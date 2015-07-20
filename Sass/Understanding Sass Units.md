@@ -35,6 +35,8 @@ Let’s deal with one thing at a time, and start with comparing units. Sass has 
 
 This means that `12px + 1in` is a perfectly valid operation that will result in `108px`. *Why 108px?* you ask. Because 1 inch equals 96 pixels, and the result of the operation is expressed in the first member’s unit, which in this case is pixels. If we had written `1in + 12px`, the result would have been `1.125in`.
 
+这意味着 `12px + 1in` 是完全有效的操作，其结果为 `108px`。你会问：*为什么是 108px？*因为 1 英寸等于 96 像素，而且运算结果的单位会以第一个数的为准，所以这里是像素。如果算式为 `1in + 12px`，那么结果会是 `1.125in`。
+
 Now, square units. While it is true that multiplying two numbers with the same unit should produce square units, in practice Sass does not allow square units because they do not make sense in CSS. When such a case occurs, Sass simply throws an error like so:
 
 > **4px\*px isn’t a valid CSS value.**
