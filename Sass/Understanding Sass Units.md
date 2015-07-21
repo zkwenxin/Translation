@@ -6,54 +6,93 @@
 
 I have written about [units in Sass](http://hugogiraudel.com/2013/09/03/use-lengths-not-strings/ "Use Lengths, Not Strings") in the past for my own blog, and not so long ago as a [CSS-Tricks Sass snippet](http://css-tricks.com/snippets/sass/correctly-adding-unit-number/ "Correctly Adding Unit to Number"), but given how often I notice confusion and misconception about the way units work in our beloved preprocessor, I thought a full length article would not be such a bad idea after all.
 
-我过去为自己的博客写过 [Sass 中的单位](http://hugogiraudel.com/2013/09/03/use-lengths-not-strings/ "使用长度，而非字符")，不久前写了[ CSS-Tricks Sass snippet](http://css-tricks.com/snippets/sass/correctly-adding-unit-number/ "正确地给数字添加单位")，但鉴于我注意到单位在大家所钟爱的预处理器中的作用方式常常被误解和混淆概念，我最终觉得写这么一篇完整的文章会是个不错的主意。
+我过去为自己的博客写过 [Sass 中的单位](http://hugogiraudel.com/2013/09/03/use-lengths-not-strings/ "使用长度，而非字符")，不久前写了[ CSS-Tricks Sass snippet](http://css-tricks.com/snippets/sass/correctly-adding-unit-number/ "正确地给数字添加单位")。但鉴于我注意到单位在大家所钟爱的预处理器中的作用方式常常被误解和混淆概念，我觉得最终写这么一篇完整的文章会是个不错的主意。
 
 After two years of writing and reading Sass code every day, I must say that snippets, articles and library code misusing Sass units are beyond counting. I have [been guilty of this myself](https://github.com/sass/sass/issues/533#issuecomment-21362165) in the past, and I have witnessed Sass core designers trying to teach developers to properly use Sass units more than once.
 
-This battle is obviously not over so let’s hope this article will be the coup de grace, in some way.
+有着两年中天天阅读和书写 Sass 代码经验的我，必须得说代码段、文章和库对 Sass 单位的误用数不胜数。我过去[一直为此自责](https://github.com/sass/sass/issues/533#issuecomment-21362165)。而且我也多次目睹了 Sass 的核心设计师们尽力教开发者们来正确使用 Sass 单位。
+
+This battle is obviously not over so let’s hope this article will be the *coup de grace*, in some way.
+
+显然这场战斗还没有结束，希望这篇文章能在某些方面成为致命一击。
 
 ## Units in real life ##
+## 现实生活中的单位 ##
 
-Before considering code, I think it is important to understand how numbers and units behave in real life. You may not have noticed this yet, but there are very few numbers we use in our daily life that do not have a unit. When we say “speed limit is 50″, we implicitly mean “50 kilometers per hour”; in this case the unit is km/h. When we say “look, eggs! I’ll have a dozen of those”, the unit is eggs: a dozen of eggs. There are exceptions of course but most usages of numbers in our daily routine usually involve a unit.
+Before considering code, I think it is important to understand how numbers and units behave in real life. You may not have noticed this yet, but there are very few numbers we use in our daily life that do not have a unit. When we say “speed limit is 50″, we implicitly mean “50 kilometers per hour”; in this case the unit is *km/h*. When we say “look, eggs! I’ll have a dozen of those”, the unit is *eggs*: a dozen of eggs. There are exceptions of course but most usages of numbers in our daily routine usually involve a unit.
 
-Along the same lines, running mathematical operations on numbers with units follow some rules. For instance, there are reasons why an area of 5 meters per 5 meters gives 25 square meters (`m²`). Same for a cube of 1 meter side: it has a volume of 1m3 because 1 meter per 1 meter per 1 meter doesn’t give 3 meters, but 1 cubic meter.
+我认为在考虑代码前，很有必要来理解下现实生活中的数字和单位是如何表现的。或许你还没有注意到，日常生活中很少有数字没有单位。当说“限速 50”时，我们隐式地指“50 千米每小时”；这里的单位是*千米/时*。当我们说“看，鸡蛋！我要一打”时，单位是*鸡蛋*：一打鸡蛋。当然也有例外，但是通常大多数我们日常对数字的使用都与单位相关。
+
+Along the same lines, running mathematical operations on numbers with units follow some rules. For instance, there are reasons why an area of 5 meters per 5 meters gives 25 square meters (`m²`). Same for a cube of 1 meter side: it has a volume of 1m ^ 3 because 1 meter per 1 meter per 1 meter doesn’t give 3 meters, but 1 cubic meter.
+
+类似的，对包含单位的数字的数学运算也遵循着一些规则。比如，之所以 5 米乘 5 米等于 25 平方米 (`m²`)是有原因的。对边长为 1 米的立方体来说也是这样：它的体积为 1 立方米是因为 1 米乘以 1 米乘以 1 米不等于 3 米，而是 1 立方米。
 
 I like how [Chris Eppstein](https://github.com/sass/sass/issues/533#issuecomment-21363158) puts it:
 
-> **2ft ^ 2 is 4 square feet (an area), not 4 ft (which would be a length). The correct thing to do in this calculation is let the units multiply along with the number. The easiest way to think how to properly do math with units is to think of a unit like it is an unknown quantity in algebra. 
+> **2ft ^ 2 is 4 square feet (an area), not 4 ft (which would be a length). The correct thing to do in this calculation is let the units multiply along with the number. The easiest way to think how to properly do math with units is to think of a unit like it is an unknown quantity in algebra.  
 > (2 * x) ^ 2 is 4 * x². If the units at the end of a calculation don’t cancel out to become the dimension you’re expecting, this is a good sign that a mathematical error was made.**
+
+我喜欢 [Chris Eppstein](https://github.com/sass/sass/issues/533#issuecomment-21363158) 的描述方式：
+> **2 英尺的平方等于 4 平方英尺（面积单位）而非 4 英尺（这是长度单位）。这个计算中正确的算法是让单位和数字一样相乘。理解如何正确进行带单位的数学运算的方式就是把单位当成代数中的一个未知数。  
+> (2 * x) ^ 2 等于 4 * x²。如果单位在运算结束后没有达到预期的维度，那么很可能出现了计算错误。**
 
 We also have to understand that some units are literally incompatible. For instance, what would the result of 2 bananas + 3 apples be? Well, it turns out we cannot compute anything more than *2 bananas + 3 apples*, because apples and bananas are not compatible units. On the other hand, the result of 1 meter + 10 centimeters gives 1.1 meter or 110 centimeters. This is because meters and centimeters are both part of the metric system and thus are compatible.
 
+我们也必须明白一些单位是无法相容的。例如，2 个香蕉 + 3 个苹果等于什么？显然，我们无法计算 *2 个香蕉 + 3 个苹果*，因为苹果和香蕉是不相容的单位。另一方面，1 米 + 10 厘米 等于 1.1 米或 110 厘米。这是因为米和厘米都属于公制，因此它们是相容的。
+
 Of course units do not have to be part of the metric system to be compatible with each others. For instance, light-years and inches are compatible units since they both serve the same purpose: measuring distances. Of course, there is no way an equation would involve both light-years and inches, since both units live at different edges of the distance units spectrum. Still, they are compatible.
 
+能相容的单位当然不一定要是公制的。比如，光年和英寸是相容的，因为它们的目的一样：测量距离。因为两个单位属于距离单位系列的不同极端，当然绝不会有计算式同时包含光年和英寸。尽管如此，它们仍然是相容的。
+
 ## Units in Sass ##
+## Sass 中的单位 ##
 
 Now that we have fully grasped the way units work in real life, it’s time to tackle units in Sass. I hope I will not surprise you when I say that units in Sass behave exactly like units in real life. Some units are compatible, some are not. Two numbers with the same unit that are multiplied together will produce square units, and so on.
 
+现在我们已经完全理解了单位在现实生活中的作用方式，该来解决 Sass 中的单位了。但愿我这么说时你不会惊讶：Sass 单位的运作方式和现实生活中的单位的一模一样。一些单位是相容的，一些不是。两个有着一样单位的数字相乘会产生平方单位，诸如此类。
+
 Let’s deal with one thing at a time, and start with comparing units. Sass has a [table of compatible units](https://github.com/sass/sass/blob/31c6c531fabc1538d37db334b2cf8b976e289c3b/lib/sass/script/value/number.rb#L455-L483) which makes it possible to figure out whether two units are comparable and compatible or not. For instance, `turn` (turns) and `deg` (degrees) are compatible; `s` (seconds) and `pt` (points) are not.
+
+让我们一个个来看，从单位的比较开始吧。Sass 有个[相容单位表](https://github.com/sass/sass/blob/31c6c531fabc1538d37db334b2cf8b976e289c3b/lib/sass/script/value/number.rb#L455-L483)，它指明了两个单位是否是可比较的、相容的。例如，`turn`（圆周？？？）和 `deg`（度）是相容的，而 `s`（秒）和 `pt`（磅）不是。
 
 This means that `12px + 1in` is a perfectly valid operation that will result in `108px`. *Why 108px?* you ask. Because 1 inch equals 96 pixels, and the result of the operation is expressed in the first member’s unit, which in this case is pixels. If we had written `1in + 12px`, the result would have been `1.125in`.
 
-这意味着 `12px + 1in` 是完全有效的操作，其结果为 `108px`。你会问：*为什么是 108px？*因为 1 英寸等于 96 像素，而且运算结果的单位会以第一个数的为准，所以这里是像素。如果算式为 `1in + 12px`，那么结果会是 `1.125in`。
+这意味着 `12px + 1in` 是完全有效的操作，其结果为 `108px`。你会问：*为什么是 108px？*因为 1 英寸等于 96 像素，且运算结果的单位会以第一个数的为准，所以这里是像素。如果算式为 `1in + 12px`，那么结果会是 `1.125in`。
 
 Now, square units. While it is true that multiplying two numbers with the same unit should produce square units, in practice Sass does not allow square units because they do not make sense in CSS. When such a case occurs, Sass simply throws an error like so:
 
 > **4px\*px isn’t a valid CSS value.**
 
+现在来看看平方单位。尽管有相同单位的两个数相乘应该得到平方单位，但因为平方单位在 CSS 中没有意义，所以实际上 Sass 并不允许平方单位。而出现这一情况时，Sass 会直接报出如下错误：  
+
+> **4px\*px 不是有效的 CSS 值。**
+
 It took me some time to understand that this message does not mean that we tried to execute `4px * px`. In the aforementioned error message, `px*px` means `px²`, so the message could as well be:
 
 > **4px² isn’t a valid CSS value.**
+
+我花了些时间才明白这条信息并不是说我们试着计算 `4px * px`。在上述错误信息中， `px*px` 意味着 `px²`，如此则该条信息也可描述成：  
+
+> **4px² 不是有效的 CSS 值。**
 
 It all makes sense: any value using `px²` as a unit, or basically any square unit for that matter, is not a valid CSS value. CSS does not support square units since it does not make any sense to have those. Now, just for the record, if you tried to run `4px * px`, Sass would throw a different error message:
 
 > **Undefined operation: “4px times px”.**
 
+这样就讲得通了：任何以 `px²` 或基本任何平方单位为单位的值，都不是有效的 CSS 值。CSS 不支持平方单位是因为对它来说平方单位并没有意义。顺便说下，如果尝试运行 `4px * px`，Sass 会报不同于上面的错误信息：  
+
+> **未定义的操作：“4px 乘以 px”。**
+
 ## What’s the matter? ##
+## 有什么关系？ ##
 
 Okay, so this has already been pretty long and perhaps you still don’t know what is the point of all that. This is the moment where I make it, don’t worry.
 
+好了，在讲了这么多之后，你或许仍不明白这些都有什么意义。别担心，现在我就会说到。
+
 When you have a unitless number, and you want to convert it to a specific unit, do not append the unit as a string. Please, I am begging you to stop this nonsense. A unit should always be coupled with a numeric value as it doesn’t make any sense in itself. `cm` is not a unit per se, it is a string; `1cm` is a unit, if that makes any sense.
+
+当你想把一个无单位的数转为有单位的，别把单位作为字符串加上。
 
 When applying logical arithmetic principles to Sass, multiplying our value by 1 item of the desired unit is enough.
 
@@ -151,16 +190,17 @@ Rewriting our previous example:
 
 So if we sum up what we’ve seen in this article:
 
-Units in Sass work exactly the same as units in real life;
-To give a number a unit, multiply the value per one member of the desired unit (e.g. `42 * 1px`);
-To remove unit from a number, divide by one member of the relevant unit (e.g. `42px / 1px`);
-When adding or subtracting two numbers with different compatible units, result is expressed in the unit of the first member;
-To convert a value from one unit to another (compatible), add the value to 0 member of the final unit (e.g. `0px + 42in`).
+- Units in Sass work exactly the same as units in real life;
+- To give a number a unit, multiply the value per one member of the desired unit (e.g. `42 * 1px`);
+- To remove unit from a number, divide by one member of the relevant unit (e.g. `42px / 1px`);
+- When adding or subtracting two numbers with different compatible units, result is expressed in the unit of the first member;
+- To convert a value from one unit to another (compatible), add the value to 0 member of the final unit (e.g. `0px + 42in`).
+
 That’s it. I hope we’ll see less and less unit aberrations for more elegant unit handling from now on. As Chris says:
 
-I think Sass’s math is really nice, once the light bulb goes on!
+> **I think Sass’s math is really nice, once the light bulb goes on!**
 
 
 
 
-原文地址：http://www.sitepoint.com/understanding-sass-units/
+原文地址： http://www.sitepoint.com/understanding-sass-units/
