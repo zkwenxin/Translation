@@ -92,29 +92,43 @@ Okay, so this has already been pretty long and perhaps you still don’t know wh
 
 When you have a unitless number, and you want to convert it to a specific unit, do not append the unit as a string. Please, I am begging you to stop this nonsense. A unit should always be coupled with a numeric value as it doesn’t make any sense in itself. `cm` is not a unit per se, it is a string; `1cm` is a unit, if that makes any sense.
 
-当你想把一个无单位的数转为有单位的，别把单位作为字符串加上。
+当你想把一个无单位的数转为有单位的时，别把单位作为字符串加上。请千万不要如此胡闹。单位本身是没有意义的，所以单位总应该和数值一起使用。`cm` 本身不是单位，而是字符串；`1cm` 才是个单位。
 
 When applying logical arithmetic principles to Sass, multiplying our value by 1 item of the desired unit is enough.
+
+在 Sass 中运用逻辑运算法则时，用值为 1 的目标单位来乘以我们的数值就足够了。
 
 	$value: 42;
 	
 	.foo {
 		font-size: ($value * 1px); // {number} 42px
 	}
-Now you probably ask yourself what’s the problem with simply appending the unit as a string given it works the same and you would you be plain right in most scenarios. Now consider this:
+
+Now you probably ask yourself *what’s the problem with simply appending the unit as a string given it works the same* and you would you be plain right in most scenarios. Now consider this:
+
+现在你很可能会暗自思忖：*既然直接把字符串形式的单位加上去能起到一样的作用，那这有什么问题吗？*多数情情况下你都是完全正确的。现在考虑下这个：
 
 	$value: 13.37;
 	
 	.foo {
 		font-size: round($value + em); // {string} 13.37em
 	}
+
 Can you guess what will happen if we tried compiling this code? If your answer is `13em`, I am sorry to inform you that you’re wrong. The correct answer is:
+
+> **$value: “13.37em” is not a number for `round’**
+
+你能猜到编译这段代码会发生什么吗？如果你的答案是 `13em`，那么很遗憾地告诉你你错了。正确的回答是：
 
 > **$value: “13.37em” is not a number for `round’**
 
 This happens because simply adding the unit on the right of a number implicitly casts the value to a string, resulting in an incorrect parameter for the `round` function (which expects a number).
 
+如此的原因是直接把单位加到数值的右边会隐式地把值转为字符串，导致其成为 `round` 函数的非法参数（合法参数为数值）。
+
 Of course if you don’t plan on running extra mathematical operations on the new value, you will never notice the difference and neither will CSS. Yet, it seems quite poor to work like this with units when you know how clever Sass is with them. For the sake of consistency, elegance and meaningful code, I highly recommend that you properly convert your unitless numbers.
+
+当然，如果你并不打算对新的值进行额外的运算操作，那么你和 CSS 都不会注意到其中的不同。然而，当你知道 Sass 能如此聪明地处理单位时，你也会发现继续那么做会显得很业余。为了一致性和优美且有意义的代码，我强烈推荐你恰当地转换无单位的数字。
 
 Actually, it all makes sense when you turn the problem upside down and want to remove the unit of a number. If the solution that immediately comes to your mind is something such as:
 
