@@ -132,34 +132,53 @@ Of course if you don’t plan on running extra mathematical operations on the ne
 
 Actually, it all makes sense when you turn the problem upside down and want to remove the unit of a number. If the solution that immediately comes to your mind is something such as:
 
+事实上，当你换个角度考虑这个问题，想把单位从数字移除时，一切就显得有意义了。如果你第一时间想到的答案类似于：
+
 	$value: 42px;
 	$unitless-value: str-slice($value + ', 1, 2); // {string} 42
+
 … then I am afraid you are doing this wrong. Removing the unit is as simple as dividing by one member of the unit. Again, it’s like in real life. If you want to get 25 from 25m, you have to divide 25m per 1m.
+
+……那么恐怕你做错了。移除单位就是像用带单位的数作为被除数一样简单。这再次展现出 Sass 的单位就像现实生活中的一样。如果你想得到 25m 中的 25，只需要用 1m 来除 25m。
 
 	$value: 42px;
 	$unitless-value: (42px / 1px); // {number} 42
+
 Then we have a number, not a string. It is completely logical, elegant and prevent any weird behaviour that might be surprising.
 
+这样我们就得到了一个数字而非字符串。这种方法是完全合乎逻辑且优雅的，而且避免了任何潜在的突发性怪异现象。
+
 ## The case of 0 ##
+## 0 的情况 ##
 
 Before leaving, there is one thing I would like to extrapolate on. Earlier in this article, you may have read that the result of an addition or subtraction between two numbers of different units is expressed in the first member’s unit.
 
+在结束前，我还想再做一个推断。在本文前面的部分，你或许已经读到两个不同单位的数字的加减运算结果会用第一个数字的单位表示。
+
 We can use this to our advantage when we want to convert one unit to another (compatible) unit for a reason or another. For instance, let’s say you want to convert seconds to milliseconds. I suppose you could multiply the value by 1000 in order to have milliseconds. On the other hand, you could leave this to Sass by adding the value to 0 millisecond, like so:
+
+我们想进行相容单位的转换时可以利用这一点。比如你想把秒转换为毫秒。我认为你可以用 1000 来乘以原始值来得到毫秒。另一方面，你可以把这个工作交给 Sass，只要用 0 毫秒加上原始值即可，像这样：
 
 	$value: 42s;
 	transition-duration: (0ms + $value); // {number} 42000ms
+
 For such a case, I agree that we could as well compute the value ourselves. But when it comes to translating degrees into radians, or dots per centimeters (`dpcm`) to dot per pixels (`dppx`), it might be better to leave it to Sass rather than engage some fairly complex calculations.
+
+在上述情况下，我同意我们也可以自己来计算结果值。但当要把度数转换为弧度，或者每厘米点数（`dpcm`）转换为每像素点数（`dppx`）时，或许还是把这些相对复杂的计算工作留给 Sass 更好些。
 
 	$resolution: 0dppx + 42dpcm; // {string} 1587.40157dppx
 	$angle: 0rad + 42deg;        // {string} 0.73304rad
+
 If you are afraid that this little trick looks too “hacky” to be used as is, you can create a short function to make the API a bit more friendly. I am not sure whether this is worth the trouble, but I’ll let you be the judge of that. Here is my take on this function:
 
-	/// Convert one unit into another
+如果你担心这个小技巧用起来会显得太旁门左道，可以创建个短小的函数来让 API 看起来更有好。我不确定是否值得这么麻烦，但还是让你自己来判断吧。下面是我写的这个函数：
+
+	/// Convert one unit into another 把一个单位转换为另一种
 	/// @author Hugo Giraudel
-	/// @param {Number} $value - Initial value
-	/// @param {String} $unit - Desired unit
+	/// @param {Number} $value - Initial value 初始值
+	/// @param {String} $unit - Desired unit 目标单位
 	/// @return {Number}
-	/// @throw Error if `$unit` does not exist or if units are incompatible.
+	/// @throw Error if `$unit` does not exist or if units are incompatible. 当 `$unit` 不存在或者单位不相容时报错。
 	@function convert-unit($value, $unit) {
 	  $units: (
 	    'px': 0px,
@@ -196,11 +215,16 @@ If you are afraid that this little trick looks too “hacky” to be used as is,
 	 
 	  @error "Unknown unit `#{$unit}`.";
 	}
+
 Rewriting our previous example:
+
+重写下我们之前的例子：
 
 	$resolution: convert-unit(42dpcm, 'dppx'); // {string} 1587.40157dppx
 	$angle: convert-unit(42deg, 'rad');        // {string} 0.73304rad
+
 ## Final thoughts ##
+## 最后的想法 ##
 
 So if we sum up what we’ve seen in this article:
 
